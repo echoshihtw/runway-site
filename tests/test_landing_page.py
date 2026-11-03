@@ -47,24 +47,24 @@ class LandingPageTest(unittest.TestCase):
         cls.parser = LandingParser()
         cls.parser.feed(HTML)
 
-    def test_story_sections_exist_in_order(self):
-        expected = ["top", "problem", "solution", "how-it-works", "trust",
-                    "faq", "pricing", "founder", "get-it"]
-        positions = [HTML.index(f'id="{section}"') for section in expected]
+    def test_the_scenes_come_in_order(self):
+        # the life-stage choice, the story's end, the pause, the planner, the footer
+        expected = ['id="chips"', 'data-step="4"', 'class="beat"', 'id="planrun"', 'class="foot"']
+        positions = [HTML.index(mark) for mark in expected]
         self.assertEqual(positions, sorted(positions))
 
     def test_the_story_is_told_by_its_headings_in_order(self):
         h = self.parser.headings
-        self.assertEqual(h[0], (1, "How long will your money last?"))
+        self.assertEqual(h[0], (1, "Where are you in life?"))
         self.assertEqual([t for level, t in h if level == 1], [h[0][1]])
         top = [t for level, t in h if level == 2]
         self.assertEqual(top, [
-            "When life changes shape, money becomes time.",
-            "So I built Runway to keep the answer current.",
-            "Check up, see the month, try a what-if.",
-            "Your numbers stay with you.",
-            "What people ask.",
-            "Free to see how long your money lasts. Pro to keep it safe.",
+            "Rent goes up.",
+            "You get a raise.",
+            "A friend's wedding abroad.",
+            "Financial Runway keeps that number true.",
+            "Try one.",
+            "Two more things it does.",
             "Know the time you have.",
         ])
         # No level is skipped on the way down.
@@ -74,13 +74,13 @@ class LandingPageTest(unittest.TestCase):
     def test_every_store_link_carries_its_own_campaign(self):
         links = re.findall(r'href="(https://apps\.apple\.com/[^"]*)"', HTML)
         self.assertEqual(links, [STORE.format(ct) for ct in (
-            "landing-hero", "landing-screens", "landing-pricing", "landing-footer")])
+            "landing-pin", "landing-head", "landing-foot")])
 
     def test_safari_offers_the_same_listing(self):
         self.assertIn('<meta name="apple-itunes-app" content="app-id=6778675088" />', HTML)
 
     def test_navigation_and_footer_reach_every_page(self):
-        for href in ("#how-it-works", "#pricing", "privacy/", "support/",
+        for href in ("./", "privacy/", "support/",
                      "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"):
             self.assertIn(href, self.parser.links)
 
@@ -95,16 +95,19 @@ class LandingPageTest(unittest.TestCase):
                      "0:00", "{price}", "ct=", "Sticky at the foot"):
             self.assertNotIn(text, re.sub(r"&amp;ct=[a-z-]+", "", HTML), text)
 
-    def test_pro_is_one_payment_with_no_invented_price(self):
-        self.assertIn("One payment, no subscription.", HTML_FLAT)
+    def test_the_promise_names_records_not_numbers(self):
+        # brand voice: claims say "your records", which never leave the phone
+        self.assertIn("Your records stay on your phone", HTML_FLAT)
+        self.assertNotIn("Your numbers stay", HTML_FLAT)
         self.assertIsNone(re.search(r"\$\d+\.\d\d", HTML))
 
-    def test_trust_names_the_backup_exception(self):
-        self.assertIn("Unless you back them up to a file of your own.", HTML_FLAT)
+    def test_example_amounts_are_marked_as_examples(self):
+        self.assertIn("Example amounts", HTML_FLAT)
 
-    def test_faq_answers_five_questions(self):
-        faq = HTML[HTML.index('id="faq"'):HTML.index('id="pricing"')]
-        self.assertEqual(faq.count("<h3"), 5)
+    def test_each_runway_state_keeps_its_own_words(self):
+        js = (ROOT / "assets" / "home.js").read_text(encoding="utf-8")
+        self.assertIn("Worth a closer look.", js)
+        self.assertIn("A good time to make a plan.", js)
 
     def test_no_em_dashes(self):
         for path in [ROOT / "index.html", ROOT / "assets" / "home.css", ROOT / "assets" / "home.js"]:
@@ -120,10 +123,13 @@ class LandingPageTest(unittest.TestCase):
 
     def test_motion_respects_reduced_motion_and_needs_no_script_to_read(self):
         css = (ROOT / "assets" / "home.css").read_text(encoding="utf-8")
-        self.assertIn("prefers-reduced-motion: reduce", css)
-        # The waiting state is set by the script, so without it the page shows its final state.
-        self.assertIn("classList.add('wait')", (ROOT / "assets" / "home.js").read_text(encoding="utf-8"))
+        js = (ROOT / "assets" / "home.js").read_text(encoding="utf-8")
+        self.assertIn("prefers-reduced-motion", css)
+        # the trailer, the arrival beats and the glides all check reduce motion
+        self.assertIn("prefers-reduced-motion: reduce", js)
         self.assertIn('<script src="assets/home.js" defer></script>', HTML)
+        # the story's words are in the page, not only written by the script
+        self.assertIn('<h2 id="h1">Rent goes up.</h2>', HTML)
 
     def test_icon_is_the_circle_and_star_mark(self):
         self.assertIn('<link rel="icon" type="image/svg+xml" href="assets/icon.svg" />', HTML)
@@ -255,37 +261,3 @@ def _jpeg_size(data):
             continue
         i += 2 + int.from_bytes(data[i + 2:i + 4], "big")
     raise AssertionError("no JPEG dimensions found")
-
-
-class HeroDemoTest(unittest.TestCase):
-    """The hero phone plays a check-up loop, so it needs WCAG 2.2.2's pause control."""
-
-    def setUp(self):
-        hero = HTML[HTML.index('id="top"'):HTML.index('id="problem"')]
-        self.hero = re.sub(r"\s+", " ", hero)
-        self.css = (ROOT / "assets" / "home.css").read_text(encoding="utf-8")
-
-    def test_pause_button_is_labelled_and_pressable(self):
-        button = re.search(r'<button[^>]*class="demo-toggle"[^>]*>', self.hero)
-        self.assertIsNotNone(button)
-        self.assertIn('type="button"', button.group(0))
-        self.assertIn('aria-label="Pause the demo"', button.group(0))
-        self.assertIn('aria-pressed="false"', button.group(0))
-
-    def test_demo_is_one_image_with_a_one_sentence_label(self):
-        shot = re.search(r'<div class="shot"[^>]*>', self.hero).group(0)
-        self.assertIn('role="img"', shot)
-        self.assertIn('aria-label="', shot)
-        label = re.search(r'data-demo-label="([^"]+)"', shot)
-        self.assertIsNotNone(label)
-        self.assertEqual(label.group(1).count(". "), 0)
-        # Everything inside is hidden, so the loop's changing text is never read out.
-        self.assertIn('<div aria-hidden="true" class="demo-stage">', self.hero)
-
-    def test_reduced_motion_hides_the_pause_button(self):
-        flat = re.sub(r"\s+", " ", self.css)
-        self.assertRegex(flat, r"@media \(prefers-reduced-motion: reduce\) \{[^}]*\.demo-toggle \{ display: none; \}")
-
-    def test_demo_screens_come_from_the_page_itself(self):
-        self.assertIn('data-demo="check-up"', HTML)
-        self.assertIn('data-demo="result"', HTML)
