@@ -1,0 +1,270 @@
+/* Inter and JetBrains Mono, the app's own typefaces, served from this site.
+   Variable files, so one request each covers every weight. Self-hosted on
+   purpose: a page that promises your data stays on your phone should not ask
+   a third party for a font. */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url(fonts/inter.woff2) format("woff2");
+}
+
+@font-face {
+  font-family: "Newsreader";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(fonts/newsreader-400.woff2) format("woff2");
+}
+
+@font-face {
+  font-family: "Newsreader";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(fonts/newsreader-500.woff2) format("woff2");
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: swap;
+  src: url(fonts/jetbrains-mono.woff2) format("woff2");
+}
+
+:root {
+  --bg: #f7f8fa;
+  --surface: #ffffff;
+  --text: #141821;
+  --muted: #5a6475;
+  --border: #e3e7ee;
+  --accent: #1f8a5b;
+  --link: #1d63b8;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  /* Straight from the app's tokens, so the two read as one product. */
+  :root {
+    --bg: #040d1a;
+    --surface: #060f1e;
+    --text: #cdd5e0;
+    --muted: #6b7f96;
+    --border: #0d1f3a;
+    --accent: #8fddaa;
+    --link: #7fb6ef;
+    color-scheme: dark;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font:
+    16px/1.65 Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+}
+
+.wrap {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 4rem;
+}
+
+header.site {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 2.5rem;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  /* The app shows this wordmark on launch in JetBrains Mono. Same face here. */
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.brand span {
+  color: var(--accent);
+}
+
+.brand img {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  display: block;
+}
+
+nav a {
+  color: var(--muted);
+  text-decoration: none;
+  margin-left: 1rem;
+  font-size: 0.95rem;
+}
+
+nav a:first-child {
+  margin-left: 0;
+}
+nav a[aria-current="page"] {
+  color: var(--text);
+  font-weight: 600;
+}
+
+h1 {
+  font-size: 2rem;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.5rem;
+}
+
+h2 {
+  font-size: 1.2rem;
+  margin: 2.25rem 0 0.5rem;
+}
+
+h3 {
+  font-size: 1rem;
+  margin: 1.5rem 0 0.25rem;
+}
+
+p,
+li {
+  color: var(--text);
+}
+
+.lede {
+  color: var(--muted);
+  font-size: 1.05rem;
+  margin-top: 0;
+}
+.meta {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+a {
+  color: var(--link);
+}
+
+ul {
+  padding-left: 1.25rem;
+}
+li {
+  margin: 0.3rem 0;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.25rem 1.25rem 0.5rem;
+  margin: 1.5rem 0;
+}
+
+.card h2:first-child,
+.card h3:first-child {
+  margin-top: 0;
+}
+
+.button {
+  display: inline-block;
+  background: var(--accent);
+  color: #06140d;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 0.65rem 1.1rem;
+  border-radius: 999px;
+  margin: 0.25rem 0 1rem;
+}
+
+.links {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+
+.links a {
+  display: block;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.links a strong {
+  display: block;
+}
+.links a span {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  margin: 0.75rem 0 1rem;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 0.5rem 0.6rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+th {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+code {
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.9em;
+}
+
+footer.site {
+  margin-top: 3.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+footer.site a {
+  color: var(--muted);
+}
