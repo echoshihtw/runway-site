@@ -179,8 +179,8 @@ function trailer(){
 }
 function pin(){
   const vh=innerHeight,run=$('planrun').getBoundingClientRect(),foot=document.querySelector('.foot').getBoundingClientRect();
-  const inPlan=run.top<vh*.5&&run.bottom>vh*.5,footSeen=foot.top<vh;
-  const show=scrollY>vh*.9&&!inPlan&&!footSeen,el=$('pin');
+  const inPlan=run.top<vh*.5&&run.bottom>vh*.5,footSeen=foot.top<vh,s=scrollY/vh,atEnd=s>3.5&&s<5.6;
+  const show=scrollY>vh*.9&&!inPlan&&!footSeen&&!atEnd,el=$('pin');
   el.classList.toggle('on',show);el.tabIndex=show?0:-1;el.setAttribute('aria-hidden',!show);
 }
 addEventListener('scroll',()=>requestAnimationFrame(pin),{passive:true});
