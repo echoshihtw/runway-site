@@ -255,3 +255,37 @@ def _jpeg_size(data):
             continue
         i += 2 + int.from_bytes(data[i + 2:i + 4], "big")
     raise AssertionError("no JPEG dimensions found")
+
+
+class HeroDemoTest(unittest.TestCase):
+    """The hero phone plays a check-up loop, so it needs WCAG 2.2.2's pause control."""
+
+    def setUp(self):
+        hero = HTML[HTML.index('id="top"'):HTML.index('id="problem"')]
+        self.hero = re.sub(r"\s+", " ", hero)
+        self.css = (ROOT / "assets" / "home.css").read_text(encoding="utf-8")
+
+    def test_pause_button_is_labelled_and_pressable(self):
+        button = re.search(r'<button[^>]*class="demo-toggle"[^>]*>', self.hero)
+        self.assertIsNotNone(button)
+        self.assertIn('type="button"', button.group(0))
+        self.assertIn('aria-label="Pause the demo"', button.group(0))
+        self.assertIn('aria-pressed="false"', button.group(0))
+
+    def test_demo_is_one_image_with_a_one_sentence_label(self):
+        shot = re.search(r'<div class="shot"[^>]*>', self.hero).group(0)
+        self.assertIn('role="img"', shot)
+        self.assertIn('aria-label="', shot)
+        label = re.search(r'data-demo-label="([^"]+)"', shot)
+        self.assertIsNotNone(label)
+        self.assertEqual(label.group(1).count(". "), 0)
+        # Everything inside is hidden, so the loop's changing text is never read out.
+        self.assertIn('<div aria-hidden="true" class="demo-stage">', self.hero)
+
+    def test_reduced_motion_hides_the_pause_button(self):
+        flat = re.sub(r"\s+", " ", self.css)
+        self.assertRegex(flat, r"@media \(prefers-reduced-motion: reduce\) \{[^}]*\.demo-toggle \{ display: none; \}")
+
+    def test_demo_screens_come_from_the_page_itself(self):
+        self.assertIn('data-demo="check-up"', HTML)
+        self.assertIn('data-demo="result"', HTML)
