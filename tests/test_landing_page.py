@@ -131,6 +131,15 @@ class LandingPageTest(unittest.TestCase):
         # the story's words are in the page, not only written by the script
         self.assertIn('<h2 id="h1">Rent goes up.</h2>', HTML)
 
+    def test_the_trailer_moves_for_under_five_seconds(self):
+        # WCAG 2.2.2: motion that starts by itself and lasts over five seconds needs a pause control
+        js = (ROOT / "assets" / "home.js").read_text(encoding="utf-8")
+        run = re.search(r"const run=(\[\[.*?\]\]),t0", js).group(1)
+        last = max(int(t) for t in re.findall(r"\[(\d+),", run))
+        self.assertLess(last, 5000)
+        # and any scroll, key, tap or click stops it at once
+        self.assertIn("['wheel','touchstart','keydown','pointerdown']", js)
+
     def test_icon_is_the_circle_and_star_mark(self):
         self.assertIn('<link rel="icon" type="image/svg+xml" href="assets/icon.svg" />', HTML)
         self.assertTrue((ROOT / "assets" / "icon.svg").exists())

@@ -169,7 +169,8 @@ let demo=null;
 function trailer(){
   if(matchMedia('(prefers-reduced-motion: reduce)').matches||scrollY>2)return;
   // play each moment with a pause to read it, then go home in one calm morph (-1 marks the way home)
-  const run=[[0,0],[600,0],[1400,1],[2400,1],[3200,2],[4200,2],[5000,3],[6000,3],[6001,-1],[7400,0]],t0=performance.now();
+  // under five seconds of motion, so it needs no pause control (WCAG 2.2.2)
+  const run=[[0,0],[300,0],[900,1],[1500,1],[2100,2],[2700,2],[3300,3],[3900,3],[3901,-1],[4800,0]],t0=performance.now();
   const stop=()=>{demo=null;frame();['wheel','touchstart','keydown','pointerdown'].forEach(e=>removeEventListener(e,stop))};
   ['wheel','touchstart','keydown','pointerdown'].forEach(e=>addEventListener(e,stop,{passive:true}));
   const tick=now=>{const t=now-t0;if(t>=run[run.length-1][0]){stop();return}
