@@ -141,7 +141,8 @@ h1,h2{font-size:clamp(32px,6vw,60px);letter-spacing:-.04em;line-height:1;margin:
 .brand .mark{width:15px;height:16px}
 /* the entrance: the logo's circle leaves, then grows back in a beat after the travelling one lands */
 .brand .mc{transform-box:fill-box;transform-origin:50% 50%;transition:transform .45s cubic-bezier(.34,1.56,.64,1) .2s,opacity .2s .2s}
-.brand .mark.gone .mc{opacity:0;transform:scale(0);transition:none}.mark .mc{color:var(--runway)}.mark .ms{fill:var(--ink)}
+.brand .mark.gone .mc{opacity:0;transform:scale(0);transition:none}
+.mark .mc{color:var(--runway)}.mark .ms{fill:var(--ink)}
 .get{color:var(--ink);font-weight:600;font-size:15px;text-decoration:none;display:inline-flex;align-items:center;min-height:44px;background:linear-gradient(currentColor,currentColor) 0 calc(100% - 10px)/100% 1.5px no-repeat}
 /* keyboard keys show only where there is a keyboard and a fine pointer */
 .kb{display:none}.hint .pick,.lead .pick{margin-top:var(--s1)}

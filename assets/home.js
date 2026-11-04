@@ -163,17 +163,17 @@ function entrance(){
   if(calm||scrollY>2)return;
   const story=document.querySelector('.story'),s=document.querySelector('.solid'),el=$('shape'),t0=performance.now();
   const logo=spot(document.querySelector('.brand .mc')),box=el.getBoundingClientRect(),home=s.getBoundingClientRect();
-  const B={x:box.left+box.width/2,y:box.top+box.height/2},C=bow(logo,B),round=radii('circle'),own=key(0).r,k0=logo.d/(.9*box.width);
-  s.style.transformOrigin=`${B.x-home.left}px ${B.y-home.top}px`;s.style.willChange='transform';
+  const B={x:box.left+box.width/2,y:box.top+box.height/2},C=bow(logo,B),zoom=home.width/s.offsetWidth,round=radii('circle'),own=key(0).r,k0=logo.d/(.9*box.width);
+  s.style.transformOrigin=`${(B.x-home.left)/zoom}px ${(B.y-home.top)/zoom}px`;s.style.willChange='transform';
   const mark=document.querySelector('.brand .mark');let done=0;story.classList.add('entering');
   const stop=()=>{if(done)return;done=1;s.style.transform=s.style.transformOrigin=s.style.willChange='';story.classList.remove('entering');mark.classList.remove('gone');frame();
     ['wheel','touchstart','keydown','pointerdown'].forEach(e=>removeEventListener(e,stop))};
   ['wheel','touchstart','keydown','pointerdown'].forEach(e=>addEventListener(e,stop,{passive:true}));
   const tick=now=>{if(done)return;const go=clamp01((now-t0-ENTER.wait)/ENTER.move),t=glide(go),f=follow(go);
-    const x=q2(logo.x,C.x,B.x,t)-B.x,y=q2(logo.y,C.y,B.y,t)-B.y,size=lerp(k0,1,f)*(1+.06*hump(go,0,.25)),sq=.16*hump(go,.82,1);
+    const x=(q2(logo.x,C.x,B.x,t)-B.x)/zoom,y=(q2(logo.y,C.y,B.y,t)-B.y)/zoom,size=lerp(k0,1,f)*(1+.06*hump(go,0,.25)),sq=.16*hump(go,.82,1);
     mark.classList.toggle('gone',go>0); // the logo's own circle is the one travelling, so it is gone until it lands
     el.style.clipPath=poly(mix(round,own,f),0); // round like the logo, its own shape by the time it lands
-    s.style.transform=`translate(${x}px,${y+box.height*size*sq/2}px) scale(${size*(1+sq)},${size*(1-sq)})`;
+    s.style.transform=`translate(${x}px,${y+box.height/zoom*size*sq/2}px) scale(${size*(1+sq)},${size*(1-sq)})`;
     if(go>=1){stop();return}requestAnimationFrame(tick)};
   requestAnimationFrame(tick);
 }
@@ -186,9 +186,9 @@ function pin(){
 addEventListener('scroll',()=>requestAnimationFrame(pin),{passive:true});
 let queued=0;
 // once the story has scrolled away it is drawn one last time, then left alone until it comes back
-let gone=0;
+let storyAway=0;
 addEventListener('scroll',()=>{const story=document.querySelector('.story'),past=scrollY>story.offsetTop+story.offsetHeight;
-  if(past&&gone)return;gone=past;if(!queued){queued=1;requestAnimationFrame(()=>{queued=0;frame()})}},{passive:true});
+  if(past&&storyAway)return;storyAway=past;if(!queued){queued=1;requestAnimationFrame(()=>{queued=0;frame()})}},{passive:true});
 let pose=[];
 function measure(){
   const w=$('wrap');w.style.transform='';
