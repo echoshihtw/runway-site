@@ -1,3 +1,4 @@
+import json
 import re
 import unittest
 from html.parser import HTMLParser
@@ -65,6 +66,7 @@ class LandingPageTest(unittest.TestCase):
             "Financial Runway keeps that number true.",
             "Try one.",
             "Two more things it does.",
+            "What people ask.",
             "Know the time you have.",
         ])
         # No level is skipped on the way down.
@@ -139,6 +141,27 @@ class LandingPageTest(unittest.TestCase):
         self.assertLess(last, 5000)
         # and any scroll, key, tap or click stops it at once
         self.assertIn("['wheel','touchstart','keydown','pointerdown']", js)
+
+    def test_the_first_words_name_the_topic(self):
+        # search engines and people read the lead first; it says what the app does
+        self.assertIn("Financial Runway counts how many months your money lasts.", HTML_FLAT)
+
+    def test_what_people_ask_answers_six_questions(self):
+        asks = HTML[HTML.index('id="asks-h"'):HTML.index('<footer')]
+        self.assertEqual(asks.count("<h3>"), 6)
+        self.assertIn("Do I need to link my bank?", asks)
+
+    def test_search_engines_are_told_what_the_app_is(self):
+        data = json.loads(re.search(r'<script type="application/ld\+json">(.*?)</script>', HTML, re.S).group(1))
+        self.assertEqual(data["@type"], "SoftwareApplication")
+        self.assertEqual(data["operatingSystem"], "iOS")
+        self.assertEqual(data["offers"]["price"], "0")
+        self.assertIn("id6778675088", data["downloadUrl"])
+
+    def test_the_sitemap_lists_every_page(self):
+        sitemap = (ROOT / "sitemap.xml").read_text(encoding="utf-8")
+        for slug in ("", "privacy/", "support/"):
+            self.assertIn(f"<loc>https://echoshihtw.github.io/runway-site/{slug}</loc>", sitemap)
 
     def test_icon_is_the_circle_and_star_mark(self):
         self.assertIn('<link rel="icon" type="image/svg+xml" href="assets/icon.svg" />', HTML)

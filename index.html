@@ -31,6 +31,9 @@
     <link rel="icon" type="image/svg+xml" href="assets/icon.svg" />
     <link rel="apple-touch-icon" href="assets/icon-180.png" />
     <link rel="preload" href="assets/fonts/InterTight.ttf" as="font" type="font/ttf" crossorigin />
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"SoftwareApplication","name":"Financial Runway","operatingSystem":"iOS","applicationCategory":"FinanceApplication","description":"Your money, counted in time: how many months it lasts from today. No account and no bank connection.","url":"https://echoshihtw.github.io/runway-site/","downloadUrl":"https://apps.apple.com/app/id6778675088","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+    </script>
     <link rel="stylesheet" href="assets/home.css" />
     <script src="assets/home.js" defer></script>
   </head>
@@ -60,7 +63,7 @@
   <div class="steps">
     <section class="step" data-step="0"><div>
       <h1>Where are you in life?</h1>
-      <p class="lead">Pick one. Your money becomes time.</p>
+      <p class="lead">Financial Runway counts how many months your money lasts. Pick where you are.</p>
       <div class="chips" id="chips" role="radiogroup" aria-label="Where are you in life?">
         <button class="on" data-life="0">Working</button><button data-life="1">Studying</button>
         <button data-life="2">Between jobs</button><button data-life="3">Retired</button>
@@ -116,6 +119,18 @@
     <button onclick="this.classList.toggle('open')"><b>Check up</b><span>Tap to update this week</span><div class="reveal">14 → 15 months</div></button>
     <button onclick="this.classList.toggle('open')"><b>See the month</b><span>Tap to see where it ends</span><div class="reveal">February 2028</div></button>
     
+  </div>
+</section>
+
+<section class="asks" aria-labelledby="asks-h">
+  <h2 id="asks-h">What people ask.</h2>
+  <div class="qas">
+    <div class="qa"><h3>How does Financial Runway work out how long my money lasts?</h3><p>You type what you have, what you owe and what you usually spend. Runway takes the money you can use, divides it by what goes out each month, and shows the months it lasts and the month it reaches.</p></div>
+    <div class="qa"><h3>Does it count money coming in?</h3><p>The main number leaves money coming in out, so it shows how long you would be fine if it stopped. Add your pay, a pension or pocket money, and a second line shows what it adds.</p></div>
+    <div class="qa"><h3>Do I need to link my bank?</h3><p>No. There is no account to make and no bank login. You type your balances yourself, and nothing connects to your bank.</p></div>
+    <div class="qa"><h3>What is a check-up?</h3><p>Once a week you type today's balances. Runway compares them with what it expected and asks only about the differences, so the number stays true without writing down every spend.</p></div>
+    <div class="qa"><h3>Where do my records go?</h3><p>They stay on your iPhone, in an encrypted database, and are never uploaded. Runway sends anonymous usage counts that never include amounts, balances, names or notes.</p></div>
+    <div class="qa"><h3>Is it free?</h3><p>Yes. Financial Runway is free on iPhone.</p></div>
   </div>
 </section>
 

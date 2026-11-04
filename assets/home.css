@@ -58,6 +58,10 @@ h1,h2{font-size:clamp(32px,6vw,60px);letter-spacing:-.04em;line-height:1;margin:
 @media (max-width:799px){.wrap{width:60vw}.step{padding-top:0}.step>div{top:max(6vh,72px)}}
 /* after the story */
 .after{position:relative;z-index:3;background:var(--paper);padding:14vh 24px;max-width:1080px;margin:0 auto}
+.asks{position:relative;z-index:3;background:var(--paper);padding:0 24px 14vh;max-width:1080px;margin:0 auto}
+.qas{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:var(--s5) var(--s6);margin-top:var(--s5)}
+.qa h3{margin:0 0 var(--s1);font-size:20px;letter-spacing:-.02em;line-height:1.25}
+.qa p{margin:0;font-size:17px;line-height:1.5;opacity:.8}
 .proof{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:var(--s3);margin-top:var(--s4)}
 .proof button{all:unset;cursor:pointer;background:var(--card);border-radius:20px;padding:24px;min-height:min(180px,32vw);gap:var(--s3);display:flex;flex-direction:column;justify-content:space-between;transition:transform .3s var(--ease),background .3s}
 .proof button:hover,.proof button:focus-visible{transform:translateY(-6px);background:var(--soft)}
