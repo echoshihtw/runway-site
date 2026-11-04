@@ -57,9 +57,17 @@ h1,h2{font-size:clamp(32px,6vw,60px);letter-spacing:-.04em;line-height:1;margin:
 @media (max-width:799px){.wrap{width:60vw}.step{padding-top:0}.step>div{top:max(6vh,72px)}}
 /* after the story */
 .asks{position:relative;z-index:3;background:var(--paper);padding:14vh 24px;max-width:1080px;margin:0 auto}
-.qas{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:var(--s5) var(--s6);margin-top:var(--s5)}
-.qa h3{margin:0 0 var(--s1);font-size:20px;letter-spacing:-.02em;line-height:1.25}
-.qa p{margin:0;font-size:17px;line-height:1.5;opacity:.8}
+.qas{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:0 var(--s6);align-items:start;margin-top:var(--s5)}
+/* questions only; an answer opens on tap, and its circle fills like a month that is covered */
+.qa{border-top:1px solid var(--line)}
+.qa summary{list-style:none;display:flex;gap:var(--s2);align-items:baseline;min-height:44px;padding:var(--s3) 0;cursor:pointer}
+.qa summary::-webkit-details-marker{display:none}
+.qa summary::before{content:"";flex:none;width:12px;height:12px;border-radius:50%;box-sizing:border-box;border:2px solid var(--runway);transform:translateY(1px);transition:background .25s var(--ease),transform .25s var(--ease)}
+.qa[open] summary::before{background:var(--runway);transform:translateY(1px) scale(1.15)}
+.qa h3{margin:0;font-size:20px;letter-spacing:-.02em;line-height:1.25}
+.qa p{margin:0 0 var(--s4) 24px;font-size:17px;line-height:1.5;opacity:.8}
+.qa[open] p{animation:open .35s var(--ease)}
+@keyframes open{from{opacity:0;transform:translateY(-6px)}}
 .cta{display:inline-block;margin-top:var(--s5);background:var(--ink);color:var(--paper);padding:16px 26px;border-radius:99px;text-decoration:none;font-weight:700}
 
 /* one circle through the page: the full stops are real dots, and while scroll carries the circle they are only its places */
@@ -67,7 +75,7 @@ h1,h2{font-size:clamp(32px,6vw,60px);letter-spacing:-.04em;line-height:1;margin:
 .beat .el+.el,.beat .el+.pt{margin-left:.07em}
 .pt{background:var(--runway)}
 .foot .pt{background:#9DB2E0}
-.carrier{position:fixed;left:0;top:0;width:100px;height:100px;border-radius:50%;background:var(--runway);z-index:4;pointer-events:none;opacity:0;transform-origin:50% 100%;will-change:transform}
+.carrier{position:fixed;left:0;top:0;width:100px;height:100px;border-radius:50%;background:var(--runway);z-index:4;pointer-events:none;opacity:0;will-change:transform}
 .carry .pt{background:var(--ink)}.carry .foot .pt{background:var(--paper)}
 .pcircle{transition:color .3s var(--ease)}
 .carry .pcircle.away{visibility:hidden;color:transparent;transition:none}
@@ -158,5 +166,9 @@ kbd{font-family:inherit;font-size:15px;font-weight:700;line-height:1;color:var(-
 .small span{opacity:.6;padding:12px 0}
 .water{display:flex;align-items:baseline;justify-content:center;gap:0;margin:0;padding-bottom:2vw;color:rgba(245,240,230,.07);font-weight:800;letter-spacing:-.06em;line-height:.78;font-size:clamp(72px,21vw,280px);user-select:none;pointer-events:none}
 .water .mark{width:.3em;height:.32em;flex:none;margin-left:.02em}.water .mark .mc{color:#9DB2E0}.water .mark .ms{fill:rgba(245,240,230,.1)}
+/* when the circle lands in the logo, its star lights: one spring a little past its size, then still */
+.water .lit{transform-box:fill-box;transform-origin:50% 50%;transform:scale(.85);transition:transform .6s cubic-bezier(.34,1.56,.64,1)}
+.water .lit .ms{transition:fill .4s var(--ease)}
+.water .mark.on .lit{transform:rotate(90deg) scale(1)}.water .mark.on .ms{fill:var(--paper)}
 .foot :focus-visible{outline-color:#9DB2E0}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}

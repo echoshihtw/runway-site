@@ -354,6 +354,9 @@ addEventListener('keydown',e=>{
 // on to the end of "What if", into the planner's circle, through the full stops of the last two headings
 // and into the logo. It travels on an arc, gathers before it
 // leaves and squashes as it lands; the number never travels, it fades out before and in after.
+// a cubic-bezier timing curve, as in CSS: x is progress through the move, the result is how far along it is
+const bez=(x1,y1,x2,y2)=>x=>{let lo=0,hi=1,u=x;for(let i=0;i<20;i++){const X=3*(1-u)*(1-u)*u*x1+3*(1-u)*u*u*x2+u*u*u;if(X<x)lo=u;else hi=u;u=(lo+hi)/2}return 3*(1-u)*(1-u)*u*y1+3*(1-u)*u*u*y2+u*u*u};
+const glide=bez(.3,0,0,1),follow=bez(.45,0,.15,1); // a soft start and a long, gentle landing; size a beat behind
 const clamp01=v=>Math.min(1,Math.max(0,v)),hump=(u,a,b)=>Math.sin(Math.PI*clamp01((u-a)/(b-a)));
 function spot(el,k=1){const r=el.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2,d:r.width*k}}
 function carry(){
@@ -368,7 +371,7 @@ function carry(){
   // the logo lands over the last stretch of the page, once the footer's full stop has its circle
   const last=()=>{const from=scrollY+spot($('pt4')).y-.6*vh,room=document.documentElement.scrollHeight-vh-from;return clamp01((scrollY-from)/Math.max(40,room))};
   // from, to, progress, how it lands; the story's moves are driven by the beat, the later ones by their place rising into view
-  const legs=[[story,at('pt1'),byRaw(-.62,.25),'drop'],[at('pt1'),at('pt2'),byRaw(.55,.85),'drop'],[at('pt2'),plan,byRaw(.95,end),'grow'],
+  const legs=[[story,()=>{const o=spot($('pt1'));o.y-=Math.max(0,b.getBoundingClientRect().top);return o},byRaw(-.62,.25),'drop'],[at('pt1'),at('pt2'),byRaw(.55,.85),'drop'],[at('pt2'),plan,byRaw(.95,end),'grow'],
     [plan,at('pt3'),fromPlan(),'drop'],[at('pt3'),at('pt4'),between('pt3','pt4'),'drop'],[at('pt4'),logo,last(),'drop']];
   let k=-1;legs.forEach((l,n)=>{if(l[2]>0)k=n});
   const u=k<0?0:legs[k][2],c=$('carrier');
@@ -378,19 +381,26 @@ function carry(){
   const inPlan=(k===2&&u>=1)||(k===3&&u<.15);
   pc.classList.toggle('away',!inPlan);$('pnum').style.color=k===3?`rgb(245 240 230 / ${1-u/.15})`:'';
   mark.style.visibility=k===5&&u>=1?'':'hidden';
+  mark.parentNode.classList.toggle('on',k===5&&u>=1);
   if(k<0||inPlan||(k===5&&u>=1)){c.style.opacity=0;return}
   let A=legs[k][0](),B=legs[k][1](),go=k===3?clamp01((u-.15)/.85):u;
-  const state=$('pnum').style.background,light='#9DB2E0',t=ease(go);
+  const state=$('pnum').style.background,light='#9DB2E0',t=glide(go);
   c.style.background=k<4?state:k===4?`color-mix(in oklab, ${state} ${(1-t)*100}%, ${light})`:light;
   // on a phone the planner's circle is still below the screen while the dot leaves, so that move is a fade
-  if(k===2&&innerWidth<800){c.style.opacity=1-clamp01(go*3);c.style.transform=`translate(${A.x-50}px,${A.y+A.d/2-100}px) scale(${A.d/100})`;return}
+  if(k===2&&innerWidth<800){c.style.opacity=1-clamp01(go*3);c.style.transform=`translate(${A.x-50}px,${A.y-50}px) scale(${A.d/100})`;return}
   // places too far apart to share the screen: the circle stays in view, held near the edge until the next place scrolls in
   if(k>=4){A={...A,y:Math.max(A.y,.12*vh)};B={...B,y:lerp(Math.min(B.y,.88*vh),B.y,t)}}
-  const land=legs[k][3],lift=Math.hypot(B.x-A.x,B.y-A.y)*(land==='drop'?.25:.12);
-  const C={x:(A.x+B.x)/2,y:Math.min(A.y,B.y)-lift},q=(a,m,z)=>(1-t)*(1-t)*a+2*(1-t)*t*m+t*t*z;
+  // every move bows the same way, by a fifth of its length: out to the page's open right side when it runs
+  // down the page, up into a hop when it runs across; the bend stays on screen
+  const land=legs[k][3],dx=B.x-A.x,dy=B.y-A.y,L=Math.hypot(dx,dy)||1;
+  let nx=dy/L,ny=-dx/L;if(Math.abs(dx)>Math.abs(dy)?ny>0:nx<0){nx=-nx;ny=-ny}
+  const C={x:Math.min(innerWidth-16,Math.max(16,(A.x+B.x)/2+nx*.2*L)),y:(A.y+B.y)/2+ny*.2*L},q2=(a,m,z,u)=>(1-u)*(1-u)*a+2*(1-u)*u*m+u*u*z,q=(a,m,z)=>q2(a,m,z,t);
   const x=q(A.x,C.x,B.x),y=q(A.y,C.y,B.y),gather=k<3?1+.06*hump(go,0,.25):1,out=land==='grow'?1+.08*hump(go,.75,1):1,sq=.16*(land==='drop')*hump(go,.82,1);
-  const d=lerp(A.d,B.d,t)*gather*out;
-  c.style.opacity=1;c.style.transform=`translate(${x-50}px,${y+d/2-100}px) scale(${d/100*(1+sq)},${d/100*(1-sq)})`;
+  // a full stop is a few pixels; on the way between two it grows enough to follow, and is its own size again on landing
+  let d=lerp(A.d,B.d,follow(go))*gather*out;if(k>=3)d+=Math.max(0,16-d)*hump(go,0,1);
+  // while it is fast it stretches a little along its path, and rounds up again as it slows to land
+  const t2=glide(Math.min(1,go+.01)),vx=q2(A.x,C.x,B.x,t2)-x,vy=q2(A.y,C.y,B.y,t2)-y,speed=Math.hypot(vx,vy),st=Math.min(.25,speed/Math.max(d,8)*.6),ang=Math.atan2(vy,vx)*180/Math.PI;
+  c.style.opacity=1;c.style.transform=`translate(${x-50}px,${y-50}px) translateY(${d*sq/2}px) scale(${d/100*(1+sq)},${d/100*(1-sq)}) rotate(${ang}deg) scale(${1+st},${1/(1+st)}) rotate(${-ang}deg)`;
 }
 if(!calm){document.body.classList.add('carry');addEventListener('scroll',()=>requestAnimationFrame(carry),{passive:true});addEventListener('resize',carry)}
 words();measure();planGoals();beat();if(!calm)carry();setTimeout(trailer,500);
