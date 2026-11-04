@@ -54,7 +54,7 @@ const lerp=(a,b,t)=>a+(b-a)*t, mix=(a,b,t)=>a.map((v,i)=>lerp(v,b[i],t));
 // Organic, not perfect: every shape is softened the same way, so they stay one family.
 // 1. Corners round off: each radius is averaged with its neighbours (a small window, so a triangle stays a triangle).
 // 2. The outline wavers a little, like a shape cut by hand: a gentle wave fixed per shape, so it never jitters.
-const SOFT=2,WAVER=.008;
+const SOFT=1,WAVER=0;
 const seedOf=name=>[...name].reduce((h,c)=>(h*31+c.charCodeAt(0))%9973,7);
 const radii=name=>{
   const raw=Array.from({length:N},(_,k)=>SHAPE[name](k/N*TAU)),sd=seedOf(name);
