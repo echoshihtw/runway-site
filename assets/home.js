@@ -360,14 +360,16 @@ function carry(){
   const vh=innerHeight,b=document.querySelector('.beat'),run=b.offsetHeight-vh,raw=-b.getBoundingClientRect().top/run,end=b.offsetHeight/run-.02;
   const pc=document.querySelector('.pcircle'),mark=document.querySelector('.water .mc');
   const story=()=>{const o=spot($('shape'),.9);o.y-=$('stage').getBoundingClientRect().top;return o},at=id=>()=>spot($(id)),plan=()=>spot(pc),logo=()=>spot(mark);
-  const byRaw=(a,z)=>clamp01((raw-a)/(z-a)),rise=(id,a=.85,z=.4)=>clamp01((a*vh-spot($(id)).y)/((a-z)*vh));
+  const byRaw=(a,z)=>clamp01((raw-a)/(z-a));
   // the circle leaves the planner as soon as the planner starts to scroll away, so the two are on screen together
   const fromPlan=()=>{const start=$('planrun').getBoundingClientRect().bottom-vh,stop=spot($('pt3')).y-.5*vh;return start>0?0:clamp01(-start/Math.max(1,stop-start))};
+  // from one full stop resting at 40% of the screen to the next arriving at 60%, however far apart they are
+  const between=(a,z)=>{const from=scrollY+spot($(a)).y-.4*vh,to=scrollY+spot($(z)).y-.6*vh;return clamp01((scrollY-from)/Math.max(1,to-from))};
   // the logo lands over the last stretch of the page, once the footer's full stop has its circle
   const last=()=>{const from=scrollY+spot($('pt4')).y-.6*vh,room=document.documentElement.scrollHeight-vh-from;return clamp01((scrollY-from)/Math.max(40,room))};
   // from, to, progress, how it lands; the story's moves are driven by the beat, the later ones by their place rising into view
   const legs=[[story,at('pt1'),byRaw(-.62,.25),'drop'],[at('pt1'),at('pt2'),byRaw(.55,.85),'drop'],[at('pt2'),plan,byRaw(.95,end),'grow'],
-    [plan,at('pt3'),fromPlan(),'drop'],[at('pt3'),at('pt4'),rise('pt4',.95,.6),'drop'],[at('pt4'),logo,last(),'drop']];
+    [plan,at('pt3'),fromPlan(),'drop'],[at('pt3'),at('pt4'),between('pt3','pt4'),'drop'],[at('pt4'),logo,last(),'drop']];
   let k=-1;legs.forEach((l,n)=>{if(l[2]>0)k=n});
   const u=k<0?0:legs[k][2],c=$('carrier');
   $('cnum').style.opacity=$('cline').style.opacity=1-clamp01((raw+.72)/.1); // the number fades before the circle leaves
@@ -377,18 +379,18 @@ function carry(){
   pc.classList.toggle('away',!inPlan);$('pnum').style.color=k===3?`rgb(245 240 230 / ${1-u/.15})`:'';
   mark.style.visibility=k===5&&u>=1?'':'hidden';
   if(k<0||inPlan||(k===5&&u>=1)){c.style.opacity=0;return}
-  let A=legs[k][0](),B=legs[k][1](),go=k===3?clamp01((u-.15)/.85):u,fade=1;
+  let A=legs[k][0](),B=legs[k][1](),go=k===3?clamp01((u-.15)/.85):u;
   const state=$('pnum').style.background,light='#9DB2E0',t=ease(go);
   c.style.background=k<4?state:k===4?`color-mix(in oklab, ${state} ${(1-t)*100}%, ${light})`:light;
   // on a phone the planner's circle is still below the screen while the dot leaves, so that move is a fade
   if(k===2&&innerWidth<800){c.style.opacity=1-clamp01(go*3);c.style.transform=`translate(${A.x-50}px,${A.y+A.d/2-100}px) scale(${A.d/100})`;return}
-  // two places too far apart to share the screen: the circle drops into the next one instead of crossing what people read
-  if(k>=4&&Math.abs(B.y-A.y)>.5*vh){A={x:B.x,y:B.y-Math.max(24,B.d*3),d:B.d};fade=clamp01(go/.4)}
+  // places too far apart to share the screen: the circle stays in view, held near the edge until the next place scrolls in
+  if(k>=4){A={...A,y:Math.max(A.y,.12*vh)};B={...B,y:lerp(Math.min(B.y,.88*vh),B.y,t)}}
   const land=legs[k][3],lift=Math.hypot(B.x-A.x,B.y-A.y)*(land==='drop'?.25:.12);
   const C={x:(A.x+B.x)/2,y:Math.min(A.y,B.y)-lift},q=(a,m,z)=>(1-t)*(1-t)*a+2*(1-t)*t*m+t*t*z;
   const x=q(A.x,C.x,B.x),y=q(A.y,C.y,B.y),gather=k<3?1+.06*hump(go,0,.25):1,out=land==='grow'?1+.08*hump(go,.75,1):1,sq=.16*(land==='drop')*hump(go,.82,1);
   const d=lerp(A.d,B.d,t)*gather*out;
-  c.style.opacity=fade;c.style.transform=`translate(${x-50}px,${y+d/2-100}px) scale(${d/100*(1+sq)},${d/100*(1-sq)})`;
+  c.style.opacity=1;c.style.transform=`translate(${x-50}px,${y+d/2-100}px) scale(${d/100*(1+sq)},${d/100*(1-sq)})`;
 }
 if(!calm){document.body.classList.add('carry');addEventListener('scroll',()=>requestAnimationFrame(carry),{passive:true});addEventListener('resize',carry)}
 words();measure();planGoals();beat();if(!calm)carry();setTimeout(trailer,500);
