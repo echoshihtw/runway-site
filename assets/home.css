@@ -58,12 +58,12 @@ h1,h2{font-size:clamp(32px,6vw,60px);letter-spacing:-.04em;line-height:1;margin:
 /* after the story */
 .asks{position:relative;z-index:3;background:var(--paper);padding:14vh 24px;max-width:1080px;margin:0 auto}
 .qas{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:0 var(--s6);align-items:start;margin-top:var(--s5)}
-/* questions only; an answer opens on tap, and its circle fills like a month that is covered */
+/* questions only; an answer opens on tap and its ring fills; ink, so blue stays the one circle's */
 .qa{border-top:1px solid var(--line)}
 .qa summary{list-style:none;display:flex;gap:var(--s2);align-items:baseline;min-height:44px;padding:var(--s3) 0;cursor:pointer}
 .qa summary::-webkit-details-marker{display:none}
-.qa summary::before{content:"";flex:none;width:12px;height:12px;border-radius:50%;box-sizing:border-box;border:2px solid var(--runway);transform:translateY(1px);transition:background .25s var(--ease),transform .25s var(--ease)}
-.qa[open] summary::before{background:var(--runway);transform:translateY(1px) scale(1.15)}
+.qa summary::before{content:"";flex:none;width:12px;height:12px;border-radius:50%;box-sizing:border-box;border:2px solid var(--ink);transform:translateY(1px);transition:background .25s var(--ease),transform .25s var(--ease)}
+.qa[open] summary::before{background:var(--ink);transform:translateY(1px) scale(1.15)}
 .qa h3{margin:0;font-size:20px;letter-spacing:-.02em;line-height:1.25}
 .qa p{margin:0 0 var(--s4) 24px;font-size:17px;line-height:1.5;opacity:.8}
 .qa[open] p{animation:open .35s var(--ease)}
@@ -144,8 +144,9 @@ h1,h2{font-size:clamp(32px,6vw,60px);letter-spacing:-.04em;line-height:1;margin:
 .kb{display:none}.hint .pick,.lead .pick{margin-top:var(--s1)}
 @media (hover:hover) and (pointer:fine){.kb{display:inline}.kb.pick{display:block}.touch{display:none}}
 kbd{font-family:inherit;font-size:15px;font-weight:700;line-height:1;color:var(--ink);min-width:24px;height:24px;display:inline-grid;place-items:center;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;background:var(--card);margin:0 2px;vertical-align:middle;position:relative;top:-1px}
-.trail{position:fixed;z-index:3;transform:translateY(-50%);pointer-events:none;opacity:0}
-.trail h2{margin:0}
+/* the entrance: the circle lands first, then the words */
+.steps,.cnum,.cline{transition:opacity .4s var(--ease)}
+.entering .steps,.entering .cnum,.entering .cline{opacity:0!important;transition:none}
 .pin{position:fixed;right:24px;bottom:24px;z-index:6;display:inline-flex;align-items:center;min-height:44px;padding:0 20px;border-radius:99px;background:var(--ink);color:var(--paper);font-weight:700;text-decoration:none;
   opacity:0;transform:translateY(16px);pointer-events:none;transition:opacity .35s var(--ease),transform .35s var(--ease)}
 .pin.on{opacity:1;transform:none;pointer-events:auto}
@@ -155,9 +156,9 @@ kbd{font-family:inherit;font-size:15px;font-weight:700;line-height:1;color:var(-
 .foot{position:relative;z-index:3;background:var(--ink);color:var(--paper);padding:14vh 24px 0;overflow:hidden}
 .foot .in{max-width:824px;margin:0 auto}
 .foot h2{color:var(--paper);max-width:12ch}
-.promise{list-style:none;padding:0;margin:var(--s4) 0 0;display:flex;flex-wrap:wrap;gap:var(--s1) var(--s4);font-size:17px}
+.promise{list-style:none;padding:0;margin:var(--s4) 0 0;display:flex;flex-direction:column;gap:var(--s2);font-size:17px}
 .promise li{display:flex;align-items:center;gap:var(--s1)}
-.promise li::before{content:"";width:8px;height:8px;border-radius:50%;background:#9DB2E0}
+.promise li::before{content:"";width:8px;height:8px;border-radius:50%;background:rgba(245,240,230,.5)} /* not blue: blue is the circle's */
 .foot .cta{background:var(--paper);color:var(--ink);margin-top:var(--s5)}
 .small{display:flex;flex-wrap:wrap;justify-content:space-between;gap:var(--s3);margin-top:12vh;padding:20px 0;border-top:1px solid rgba(245,240,230,.18);font-size:14px}
 .small ul{list-style:none;display:flex;flex-wrap:wrap;gap:var(--s1) var(--s4);margin:0;padding:0}

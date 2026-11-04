@@ -93,17 +93,16 @@ function poly(r,turn){
 // The ending's words: arrive like the others, then stay through the hold, then leave.
 const holdOpacity=s=>s<4?Math.max(0,1-(4-s)*2.5):s<=5?1:Math.max(0,1-(s-5)*2.5);
 function frame(){
-  const home=demo!==null&&demo<0; // -1 to 0: from the last moment straight back to the start
-  const p=home?3:demo!==null?demo:Math.min(4,Math.max(0,scrollY/innerHeight)),i=home?3:Math.min(3,Math.floor(p)),t=home?ease(demo+1):ease(p-i),a=key(i),b=home?key(0):key(i+1);
+  const p=Math.min(4,Math.max(0,scrollY/innerHeight)),i=Math.min(3,Math.floor(p)),t=ease(p-i),a=key(i),b=key(i+1);
   const el=$('shape'),size=$('wrap').offsetWidth;
-  const A=pose[i],B=home?pose[0]:pose[i+1],sc=lerp(A.s,B.s,t);
+  const A=pose[i],B=pose[i+1],sc=lerp(A.s,B.s,t);
   $('wrap').style.transform=`translate(${lerp(A.x,B.x,t)}px,${lerp(A.y,B.y,t)}px) scale(${sc})`;
   const rNow=mix(a.r,b.r,t),turnNow=lerp(a.turn,b.turn,t),clip=poly(rNow,turnNow),col=`color-mix(in oklch, rgb(${a.c}) ${((1-t)*100).toFixed(1)}%, rgb(${b.c}))`,ins=mix(a.ins,b.ins,t).map(v=>v+'%').join(' ');
   el.style.clipPath=clip;el.style.inset=ins;el.style.setProperty('--c',col);
-  const moodNow=i<3&&!home?LIVES[life][2][i]?.[2]:null,land=Math.sin(Math.PI*Math.min(1,Math.max(0,(t-.7)/.3)));
+  const moodNow=i<3?LIVES[life][2][i]?.[2]:null,land=Math.sin(Math.PI*Math.min(1,Math.max(0,(t-.7)/.3)));
   const beat={love:`scale(${1+.16*land})`,joy:`scale(${1+.14*land}) rotate(${-4*land}deg)`,pride:`translateY(${-9*land}%) scale(${1+.05*land})`,pressure:`scale(${1+.1*land},${1-.12*land})`,shock:`rotate(${12*land}deg)`,relief:`scale(${1+.03*land})`}[moodNow]||'none';
   document.querySelector('.solid').style.transform=calm?'none':beat;
-  const end=i===3&&!home?t:0,st=Math.min(1,Math.max(0,(end-.4)/.6));
+  const end=i===3?t:0,st=Math.min(1,Math.max(0,(end-.4)/.6));
   // out to an asymmetric arrangement by the middle of the step, back into the circle by its end
   const out=Math.sin(Math.PI*Math.min(1,end*1.15)),c={x:42,y:36};
   [['btri',{x:4,y:18,r:-12}],['bsq',{x:74,y:56,r:14}]].forEach(([id,to])=>{
@@ -140,17 +139,8 @@ function frame(){
   $('flash').style.opacity=d?1-Math.abs(p-at)*2:0;
   document.querySelectorAll('#dots i').forEach((x,k)=>x.classList.toggle('on',k<Math.round(p)));
   $('dots').style.opacity=p>3.5?0:1;
-  document.querySelectorAll('.step>div').forEach((x,k)=>x.style.opacity=demo!==null&&k===0?(home?Math.max(0,(demo+.5)*2):Math.max(0,1-demo*2.5)):k===4?holdOpacity(scrollY/innerHeight):Math.max(0,1-Math.abs(scrollY/innerHeight-k)*2.5));
+  document.querySelectorAll('.step>div').forEach((x,k)=>x.style.opacity=k===4?holdOpacity(scrollY/innerHeight):Math.max(0,1-Math.abs(scrollY/innerHeight-k)*2.5));
   const lead=document.querySelector('[data-step="4"] .lead');if(lead)lead.style.opacity=Math.min(1,Math.max(0,(scrollY/innerHeight-4.3)/.3));
-  const tr=$('trail');
-  if(demo!==null&&(demo>.2||home)){const k=home?3:Math.min(3,Math.round(demo)),src=document.querySelector(`[data-step="${k}"]>div`),o=home?Math.max(0,1-(demo+1)*2):k===0?0:Math.max(0,1-Math.abs(demo-k)*2.5);
-    if(tr.dataset.k!=k){tr.innerHTML=k?src.querySelector('h2').outerHTML:'';tr.dataset.k=k}
-    const hb=document.querySelector('[data-step="0"]>div').getBoundingClientRect(),right=getComputedStyle(src).textAlign==='right';
-    // on a phone the moment's words sit where they do when scrolled, at the top; on a computer, level with the shape
-    const phone=innerWidth<800;
-    Object.assign(tr.style,{opacity:o,left:hb.left+'px',width:(right?src.getBoundingClientRect().width:hb.width)+'px',
-      top:phone?getComputedStyle(src).top:(hb.top+hb.height/2)+'px',transform:phone?'none':'translateY(-50%)',textAlign:right?'right':'left'});
-  }else tr.style.opacity=0;
 }
 function length(months){ // "13 months, until December 2027"; under 3 months, weeks and a day
   const d=new Date(2026,10,3);
@@ -165,19 +155,25 @@ function words(){
     $('d'+(k+1)).textContent=(e[1]>0?'+':'−')+Math.abs(e[1])+(Math.abs(e[1])===1?' month':' months');
     $('s'+(k+1)).textContent='. Runway now '+f.n+' '+f.unit+', until '+f.until+'.'});
 }
-// The trailer: once, on arrival at the top, the shape runs through the three moments and comes back.
-// Any scroll, key, tap or reduce motion skips it; it never plays again.
-let demo=null;
-function trailer(){
-  if(matchMedia('(prefers-reduced-motion: reduce)').matches||scrollY>2)return;
-  // play each moment with a pause to read it, then go home in one calm morph (-1 marks the way home)
-  // under five seconds of motion, so it needs no pause control (WCAG 2.2.2)
-  const run=[[0,0],[300,0],[900,1],[1500,1],[2100,2],[2700,2],[3300,3],[3900,3],[3901,-1],[4800,0]],t0=performance.now();
-  let done=0;const stop=()=>{done=1;demo=null;frame();['wheel','touchstart','keydown','pointerdown'].forEach(e=>removeEventListener(e,stop))};
+// The entrance: once, at the top, a circle grows out of the logo's circle and travels to the story's place,
+// turning into this life's starting shape as it lands; then the question fades in. Under five seconds of
+// motion, so it needs no pause control (WCAG 2.2.2); any scroll, key or tap ends it, and reduce motion skips it.
+const ENTER={wait:300,move:900};
+function entrance(){
+  if(calm||scrollY>2)return;
+  const story=document.querySelector('.story'),s=document.querySelector('.solid'),el=$('shape'),t0=performance.now();
+  const logo=spot(document.querySelector('.brand .mc')),box=el.getBoundingClientRect(),home=s.getBoundingClientRect();
+  const B={x:box.left+box.width/2,y:box.top+box.height/2},C=bow(logo,B),round=radii('circle'),own=key(0).r,k0=logo.d/(.9*box.width);
+  s.style.transformOrigin=`${B.x-home.left}px ${B.y-home.top}px`;s.style.willChange='transform';
+  let done=0;story.classList.add('entering');
+  const stop=()=>{if(done)return;done=1;s.style.transform=s.style.transformOrigin=s.style.willChange='';story.classList.remove('entering');frame();
+    ['wheel','touchstart','keydown','pointerdown'].forEach(e=>removeEventListener(e,stop))};
   ['wheel','touchstart','keydown','pointerdown'].forEach(e=>addEventListener(e,stop,{passive:true}));
-  const tick=now=>{if(done)return;const t=now-t0;if(t>=run[run.length-1][0]){stop();return}
-    let k=0;while(t>run[k+1][0])k++;const [ta,a]=run[k],[tb,b]=run[k+1],q=(t-ta)/(tb-ta);
-    demo=a+(b-a)*ease(q);frame();if(demo!==null)requestAnimationFrame(tick)};
+  const tick=now=>{if(done)return;const go=clamp01((now-t0-ENTER.wait)/ENTER.move),t=glide(go),f=follow(go);
+    const x=q2(logo.x,C.x,B.x,t)-B.x,y=q2(logo.y,C.y,B.y,t)-B.y,size=lerp(k0,1,f)*(1+.06*hump(go,0,.25)),sq=.16*hump(go,.82,1);
+    el.style.clipPath=poly(mix(round,own,f),0); // round like the logo, its own shape by the time it lands
+    s.style.transform=`translate(${x}px,${y+box.height*size*sq/2}px) scale(${size*(1+sq)},${size*(1-sq)})`;
+    if(go>=1){stop();return}requestAnimationFrame(tick)};
   requestAnimationFrame(tick);
 }
 function pin(){
@@ -188,7 +184,10 @@ function pin(){
 }
 addEventListener('scroll',()=>requestAnimationFrame(pin),{passive:true});
 let queued=0;
-addEventListener('scroll',()=>{if(!queued){queued=1;requestAnimationFrame(()=>{queued=0;frame()})}},{passive:true});
+// once the story has scrolled away it is drawn one last time, then left alone until it comes back
+let gone=0;
+addEventListener('scroll',()=>{const story=document.querySelector('.story'),past=scrollY>story.offsetTop+story.offsetHeight;
+  if(past&&gone)return;gone=past;if(!queued){queued=1;requestAnimationFrame(()=>{queued=0;frame()})}},{passive:true});
 let pose=[];
 function measure(){
   const w=$('wrap');w.style.transform='';
@@ -357,6 +356,11 @@ addEventListener('keydown',e=>{
 // a cubic-bezier timing curve, as in CSS: x is progress through the move, the result is how far along it is
 const bez=(x1,y1,x2,y2)=>x=>{let lo=0,hi=1,u=x;for(let i=0;i<20;i++){const X=3*(1-u)*(1-u)*u*x1+3*(1-u)*u*u*x2+u*u*u;if(X<x)lo=u;else hi=u;u=(lo+hi)/2}return 3*(1-u)*(1-u)*u*y1+3*(1-u)*u*u*y2+u*u*u};
 const glide=bez(.3,0,0,1),follow=bez(.45,0,.15,1); // a soft start and a long, gentle landing; size a beat behind
+// Every move bows the same way, by a fifth of its length: out to the page's open right side when it runs
+// down the page, up into a hop when it runs across; the bend stays on screen. q2 walks the curve.
+function bow(A,B){const dx=B.x-A.x,dy=B.y-A.y,L=Math.hypot(dx,dy)||1;let nx=dy/L,ny=-dx/L;if(Math.abs(dx)>Math.abs(dy)?ny>0:nx<0){nx=-nx;ny=-ny}
+  return{x:Math.min(innerWidth-16,Math.max(16,(A.x+B.x)/2+nx*.2*L)),y:(A.y+B.y)/2+ny*.2*L}}
+const q2=(a,m,z,u)=>(1-u)*(1-u)*a+2*(1-u)*u*m+u*u*z;
 const clamp01=v=>Math.min(1,Math.max(0,v)),hump=(u,a,b)=>Math.sin(Math.PI*clamp01((u-a)/(b-a)));
 function spot(el,k=1){const r=el.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2,d:r.width*k}}
 function carry(){
@@ -390,11 +394,7 @@ function carry(){
   if(k===2&&innerWidth<800){c.style.opacity=1-clamp01(go*3);c.style.transform=`translate(${A.x-50}px,${A.y-50}px) scale(${A.d/100})`;return}
   // places too far apart to share the screen: the circle stays in view, held near the edge until the next place scrolls in
   if(k>=4){A={...A,y:Math.max(A.y,.12*vh)};B={...B,y:lerp(Math.min(B.y,.88*vh),B.y,t)}}
-  // every move bows the same way, by a fifth of its length: out to the page's open right side when it runs
-  // down the page, up into a hop when it runs across; the bend stays on screen
-  const land=legs[k][3],dx=B.x-A.x,dy=B.y-A.y,L=Math.hypot(dx,dy)||1;
-  let nx=dy/L,ny=-dx/L;if(Math.abs(dx)>Math.abs(dy)?ny>0:nx<0){nx=-nx;ny=-ny}
-  const C={x:Math.min(innerWidth-16,Math.max(16,(A.x+B.x)/2+nx*.2*L)),y:(A.y+B.y)/2+ny*.2*L},q2=(a,m,z,u)=>(1-u)*(1-u)*a+2*(1-u)*u*m+u*u*z,q=(a,m,z)=>q2(a,m,z,t);
+  const land=legs[k][3],C=bow(A,B),q=(a,m,z)=>q2(a,m,z,t);
   const x=q(A.x,C.x,B.x),y=q(A.y,C.y,B.y),gather=k<3?1+.06*hump(go,0,.25):1,out=land==='grow'?1+.08*hump(go,.75,1):1,sq=.16*(land==='drop')*hump(go,.82,1);
   // a full stop is a few pixels; on the way between two it grows enough to follow, and is its own size again on landing
   let d=lerp(A.d,B.d,follow(go))*gather*out;if(k>=3)d+=Math.max(0,16-d)*hump(go,0,1);
@@ -403,4 +403,4 @@ function carry(){
   c.style.opacity=1;c.style.transform=`translate(${x-50}px,${y-50}px) translateY(${d*sq/2}px) scale(${d/100*(1+sq)},${d/100*(1-sq)}) rotate(${ang}deg) scale(${1+st},${1/(1+st)}) rotate(${-ang}deg)`;
 }
 if(!calm){document.body.classList.add('carry');addEventListener('scroll',()=>requestAnimationFrame(carry),{passive:true});addEventListener('resize',carry)}
-words();measure();planGoals();beat();if(!calm)carry();setTimeout(trailer,500);
+words();measure();planGoals();beat();if(!calm)carry();entrance();
