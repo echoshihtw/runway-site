@@ -156,7 +156,7 @@ kbd{font-family:inherit;font-size:15px;font-weight:700;line-height:1;color:var(-
 .small a{color:var(--paper);text-decoration:none;display:inline-block;padding:14px 0;min-height:44px;box-sizing:border-box}
 .small a:hover{text-decoration:underline}
 .small span{opacity:.6;padding:12px 0}
-.water{display:flex;align-items:baseline;justify-content:center;gap:0;margin:0 0 -2.6vw;color:rgba(245,240,230,.07);font-weight:800;letter-spacing:-.06em;line-height:.78;font-size:clamp(72px,21vw,280px);user-select:none;pointer-events:none}
-.water .mark{width:.3em;height:.32em;flex:none;margin-left:.02em}.water .mark .mc{color:rgba(157,178,224,.16)}.water .mark .ms{fill:rgba(245,240,230,.1)}
+.water{display:flex;align-items:baseline;justify-content:center;gap:0;margin:0;padding-bottom:2vw;color:rgba(245,240,230,.07);font-weight:800;letter-spacing:-.06em;line-height:.78;font-size:clamp(72px,21vw,280px);user-select:none;pointer-events:none}
+.water .mark{width:.3em;height:.32em;flex:none;margin-left:.02em}.water .mark .mc{color:#9DB2E0}.water .mark .ms{fill:rgba(245,240,230,.1)}
 .foot :focus-visible{outline-color:#9DB2E0}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}

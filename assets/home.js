@@ -377,7 +377,7 @@ function carry(){
   if(k<0||inPlan||(k===5&&u>=1)){c.style.opacity=0;return}
   let A=legs[k][0](),B=legs[k][1](),go=k===3?clamp01((u-.15)/.85):u,fade=1;
   const state=$('pnum').style.background,light='#9DB2E0',t=ease(go);
-  c.style.background=k<4?state:k===4?`color-mix(in oklab, ${state} ${(1-t)*100}%, ${light})`:`color-mix(in oklab, ${light} ${(1-t)*100}%, rgb(157 178 224 / .16))`;
+  c.style.background=k<4?state:k===4?`color-mix(in oklab, ${state} ${(1-t)*100}%, ${light})`:light;
   // on a phone the planner's circle is still below the screen while the dot leaves, so that move is a fade
   if(k===2&&innerWidth<800){c.style.opacity=1-clamp01(go*3);c.style.transform=`translate(${A.x-50}px,${A.y+A.d/2-100}px) scale(${A.d/100})`;return}
   // two places too far apart to share the screen: the circle drops into the next one instead of crossing what people read
