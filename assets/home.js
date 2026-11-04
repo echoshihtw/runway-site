@@ -54,7 +54,7 @@ const lerp=(a,b,t)=>a+(b-a)*t, mix=(a,b,t)=>a.map((v,i)=>lerp(v,b[i],t));
 // Organic, not perfect: every shape is softened the same way, so they stay one family.
 // 1. Corners round off: each radius is averaged with its neighbours (a small window, so a triangle stays a triangle).
 // 2. The outline wavers a little, like a shape cut by hand: a gentle wave fixed per shape, so it never jitters.
-const SOFT=4,WAVER=.025;
+const SOFT=2,WAVER=.008;
 const seedOf=name=>[...name].reduce((h,c)=>(h*31+c.charCodeAt(0))%9973,7);
 const radii=name=>{
   const raw=Array.from({length:N},(_,k)=>SHAPE[name](k/N*TAU)),sd=seedOf(name);
@@ -100,8 +100,8 @@ function frame(){
   $('wrap').style.transform=`translate(${lerp(A.x,B.x,t)}px,${lerp(A.y,B.y,t)}px) scale(${sc})`;
   const rNow=mix(a.r,b.r,t),turnNow=lerp(a.turn,b.turn,t),clip=poly(rNow,turnNow),col=`color-mix(in oklch, rgb(${a.c}) ${((1-t)*100).toFixed(1)}%, rgb(${b.c}))`,ins=mix(a.ins,b.ins,t).map(v=>v+'%').join(' ');
   el.style.clipPath=clip;el.style.inset=ins;el.style.setProperty('--c',col);
-  const moodNow=i<3&&!home?LIVES[life][2][i]?.[2]:null,land=Math.sin(Math.PI*Math.min(1,Math.max(0,(t-.6)/.4)));
-  const beat={love:`scale(${1+.1*land})`,joy:`scale(${1+.08*land})`,pride:`translateY(${-4*land}%)`,pressure:`scale(${1+.06*land},${1-.08*land})`,shock:`rotate(${7*land}deg)`,relief:'none'}[moodNow]||'none';
+  const moodNow=i<3&&!home?LIVES[life][2][i]?.[2]:null,land=Math.sin(Math.PI*Math.min(1,Math.max(0,(t-.7)/.3)));
+  const beat={love:`scale(${1+.16*land})`,joy:`scale(${1+.14*land}) rotate(${-4*land}deg)`,pride:`translateY(${-9*land}%) scale(${1+.05*land})`,pressure:`scale(${1+.1*land},${1-.12*land})`,shock:`rotate(${12*land}deg)`,relief:`scale(${1+.03*land})`}[moodNow]||'none';
   document.querySelector('.solid').style.transform=calm?'none':beat;
   const end=i===3&&!home?t:0,st=Math.min(1,Math.max(0,(end-.4)/.6));
   // out to an asymmetric arrangement by the middle of the step, back into the circle by its end
@@ -134,7 +134,9 @@ function frame(){
   $('cline').innerHTML='<span>until '+f.until+'</span>'+(word?'<em class="stateword">'+word+'</em>':''); // home shows it under the date too
   const at=Math.round(p),d=at>=1&&at<=3?LIVES[life][2][at-1][1]:0;
   $('flash').textContent=d?(d>0?'+':'−')+Math.abs(d):'';
-  $('flash').style.top=`calc(${box[0]}% - ${12/sc}px)`; // 12 px on screen, whatever the stage's scale$('flash').style.transform='translateY(-100%)';
+  // 12 px above the shape on screen, whatever the stage's scale, and lifted as far as the arrival beat grows it
+  const half=$('cnum').offsetHeight/2,lift=calm?0:land*({love:.16*half,joy:.14*half,pride:.09*size+.05*half,relief:.03*half}[moodNow]||0);
+  $('flash').style.top=`calc(${box[0]}% - ${12/sc}px)`;$('flash').style.transform=`translateY(calc(-100% - ${lift}px))`;
   $('flash').style.opacity=d?1-Math.abs(p-at)*2:0;
   document.querySelectorAll('#dots i').forEach((x,k)=>x.classList.toggle('on',k<Math.round(p)));
   $('dots').style.opacity=p>3.5?0:1;
