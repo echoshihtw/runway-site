@@ -62,6 +62,14 @@ h1,h2{font-size:clamp(32px,6vw,60px);letter-spacing:-.04em;line-height:1;margin:
 .qa p{margin:0;font-size:17px;line-height:1.5;opacity:.8}
 .cta{display:inline-block;margin-top:var(--s5);background:var(--ink);color:var(--paper);padding:16px 26px;border-radius:99px;text-decoration:none;font-weight:700}
 
+/* one circle through the page: the full stops are real dots, and while scroll carries the circle they are only its places */
+.beat .pt,.beat .el{display:inline-block;width:.17em;height:.17em;border-radius:50%;margin-left:.05em;background:var(--ink)}
+.beat .el+.el,.beat .el+.pt{margin-left:.07em}
+.beat .pt{background:var(--runway)}
+.carrier{position:fixed;left:0;top:0;width:100px;height:100px;border-radius:50%;background:var(--runway);z-index:4;pointer-events:none;opacity:0;transform-origin:50% 100%;will-change:transform}
+.carry .beat .pt{visibility:hidden}
+.pcircle{transition:color .3s var(--ease)}
+.carry .pcircle.away{visibility:hidden;color:transparent;transition:none}
 /* the beat before Plan: one held pause, driven by scroll */
 .beat{position:relative;z-index:3;height:260vh;background:var(--paper)}
 .beat .hold{position:sticky;top:0;height:100vh;display:grid;place-items:center;overflow:hidden}
@@ -149,5 +157,6 @@ kbd{font-family:inherit;font-size:15px;font-weight:700;line-height:1;color:var(-
 .small span{opacity:.6;padding:12px 0}
 .water{display:flex;align-items:baseline;justify-content:center;gap:0;margin:0 0 -2.6vw;color:rgba(245,240,230,.07);font-weight:800;letter-spacing:-.06em;line-height:.78;font-size:clamp(72px,21vw,280px);user-select:none;pointer-events:none}
 .water .mark{width:.3em;height:.32em;flex:none;margin-left:.02em}.water .mark .mc{color:rgba(157,178,224,.16)}.water .mark .ms{fill:rgba(245,240,230,.1)}
+.water .mc{transform-box:fill-box;transform-origin:50% 100%}
 .foot :focus-visible{outline-color:#9DB2E0}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
