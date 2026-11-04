@@ -56,12 +56,29 @@ h1,h2{font-size:clamp(32px,6vw,60px);letter-spacing:-.04em;line-height:1;margin:
 @media (max-width:799px) and (max-height:599px){.step .lead,.hint,.dots{display:none}}
 @media (max-width:799px){.wrap{width:60vw}.step{padding-top:0}.step>div{top:max(6vh,72px)}}
 /* after the story */
-.asks{position:relative;z-index:3;background:var(--paper);padding:14vh 24px;max-width:1080px;margin:0 auto}
-.qas{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:var(--s5) var(--s6);margin-top:var(--s5)}
-.qa h3{margin:0 0 var(--s1);font-size:20px;letter-spacing:-.02em;line-height:1.25}
-.qa p{margin:0;font-size:17px;line-height:1.5;opacity:.8}
+.asks{position:relative;z-index:3;background:var(--paper);padding:14vh 24px;max-width:824px;margin:0 auto;box-sizing:content-box}
+.qas{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:0 var(--s6);align-items:start;margin-top:var(--s5)}
+/* questions only; an answer opens on tap and its ring fills; ink, so blue stays the one circle's */
+.qa{border-top:1px solid var(--line)}
+.qa summary{list-style:none;display:flex;gap:var(--s2);align-items:baseline;min-height:44px;padding:var(--s3) 0;cursor:pointer}
+.qa summary::-webkit-details-marker{display:none}
+.qa summary::before{content:"";flex:none;width:12px;height:12px;border-radius:50%;box-sizing:border-box;border:2px solid var(--ink);transform:translateY(1px);transition:background .25s var(--ease),transform .25s var(--ease)}
+.qa[open] summary::before{background:var(--ink);transform:translateY(1px) scale(1.15)}
+.qa h3{margin:0;font-size:20px;letter-spacing:-.02em;line-height:1.25}
+.qa p{margin:0 0 var(--s4) 24px;font-size:17px;line-height:1.5;opacity:.8}
+.qa[open] p{animation:open .35s var(--ease)}
+@keyframes open{from{opacity:0;transform:translateY(-6px)}}
 .cta{display:inline-block;margin-top:var(--s5);background:var(--ink);color:var(--paper);padding:16px 26px;border-radius:99px;text-decoration:none;font-weight:700}
 
+/* one circle through the page: the full stops are real dots, and while scroll carries the circle they are only its places */
+.pt,.beat .el{display:inline-block;width:.17em;height:.17em;border-radius:50%;margin-left:.05em;background:var(--ink);color:transparent;overflow:hidden}
+.beat .el+.el,.beat .el+.pt{margin-left:.07em}
+.pt{background:var(--runway)}
+.foot .pt{background:#9DB2E0}
+.carrier{position:fixed;left:0;top:0;width:100px;height:100px;border-radius:50%;background:var(--runway);z-index:4;pointer-events:none;opacity:0;will-change:transform}
+.carry .pt{background:var(--ink)}.carry .foot .pt{background:var(--paper)}
+.pcircle{transition:color .3s var(--ease)}
+.carry .pcircle.away{visibility:hidden;color:transparent;transition:none}
 /* the beat before Plan: one held pause, driven by scroll */
 .beat{position:relative;z-index:3;height:260vh;background:var(--paper)}
 .beat .hold{position:sticky;top:0;height:100vh;display:grid;place-items:center;overflow:hidden}
@@ -121,14 +138,19 @@ h1,h2{font-size:clamp(32px,6vw,60px);letter-spacing:-.04em;line-height:1;margin:
 .top{position:absolute;top:0;left:0;right:0;z-index:5;display:flex;align-items:center;justify-content:space-between;padding:18px var(--edge,24px)}
 .brand{display:flex;align-items:baseline;gap:1px;min-height:44px;color:var(--ink);text-decoration:none;font-weight:800;font-size:20px;letter-spacing:-.04em}
 .mark{width:26px;height:28px}
-.brand .mark{width:15px;height:16px}.mark .mc{color:var(--runway)}.mark .ms{fill:var(--ink)}
+.brand .mark{width:15px;height:16px}
+/* the entrance: the logo's circle leaves, then grows back in a beat after the travelling one lands */
+.brand .mc{transform-box:fill-box;transform-origin:50% 50%;transition:transform .45s cubic-bezier(.34,1.56,.64,1) .2s,opacity .2s .2s}
+.brand .mark.gone .mc{opacity:0;transform:scale(0);transition:none}
+.mark .mc{color:var(--runway)}.mark .ms{fill:var(--ink)}
 .get{color:var(--ink);font-weight:600;font-size:15px;text-decoration:none;display:inline-flex;align-items:center;min-height:44px;background:linear-gradient(currentColor,currentColor) 0 calc(100% - 10px)/100% 1.5px no-repeat}
 /* keyboard keys show only where there is a keyboard and a fine pointer */
 .kb{display:none}.hint .pick,.lead .pick{margin-top:var(--s1)}
 @media (hover:hover) and (pointer:fine){.kb{display:inline}.kb.pick{display:block}.touch{display:none}}
 kbd{font-family:inherit;font-size:15px;font-weight:700;line-height:1;color:var(--ink);min-width:24px;height:24px;display:inline-grid;place-items:center;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;background:var(--card);margin:0 2px;vertical-align:middle;position:relative;top:-1px}
-.trail{position:fixed;z-index:3;transform:translateY(-50%);pointer-events:none;opacity:0}
-.trail h2{margin:0}
+/* the entrance: the circle lands first, then the words */
+.steps,.cnum,.cline{transition:opacity .4s var(--ease)}
+.entering .steps,.entering .cnum,.entering .cline{opacity:0!important;transition:none}
 .pin{position:fixed;right:24px;bottom:24px;z-index:6;display:inline-flex;align-items:center;min-height:44px;padding:0 20px;border-radius:99px;background:var(--ink);color:var(--paper);font-weight:700;text-decoration:none;
   opacity:0;transform:translateY(16px);pointer-events:none;transition:opacity .35s var(--ease),transform .35s var(--ease)}
 .pin.on{opacity:1;transform:none;pointer-events:auto}
@@ -138,16 +160,20 @@ kbd{font-family:inherit;font-size:15px;font-weight:700;line-height:1;color:var(-
 .foot{position:relative;z-index:3;background:var(--ink);color:var(--paper);padding:14vh 24px 0;overflow:hidden}
 .foot .in{max-width:824px;margin:0 auto}
 .foot h2{color:var(--paper);max-width:12ch}
-.promise{list-style:none;padding:0;margin:var(--s4) 0 0;display:flex;flex-wrap:wrap;gap:var(--s1) var(--s4);font-size:17px}
+.promise{list-style:none;padding:0;margin:var(--s4) 0 0;display:flex;flex-direction:column;gap:var(--s2);font-size:17px}
 .promise li{display:flex;align-items:center;gap:var(--s1)}
-.promise li::before{content:"";width:8px;height:8px;border-radius:50%;background:#9DB2E0}
+.promise li::before{content:"";width:8px;height:8px;border-radius:50%;background:rgba(245,240,230,.5)} /* not blue: blue is the circle's */
 .foot .cta{background:var(--paper);color:var(--ink);margin-top:var(--s5)}
 .small{display:flex;flex-wrap:wrap;justify-content:space-between;gap:var(--s3);margin-top:12vh;padding:20px 0;border-top:1px solid rgba(245,240,230,.18);font-size:14px}
 .small ul{list-style:none;display:flex;flex-wrap:wrap;gap:var(--s1) var(--s4);margin:0;padding:0}
 .small a{color:var(--paper);text-decoration:none;display:inline-block;padding:14px 0;min-height:44px;box-sizing:border-box}
 .small a:hover{text-decoration:underline}
 .small span{opacity:.6;padding:12px 0}
-.water{display:flex;align-items:baseline;justify-content:center;gap:0;margin:0 0 -2.6vw;color:rgba(245,240,230,.07);font-weight:800;letter-spacing:-.06em;line-height:.78;font-size:clamp(72px,21vw,280px);user-select:none;pointer-events:none}
-.water .mark{width:.3em;height:.32em;flex:none;margin-left:.02em}.water .mark .mc{color:rgba(157,178,224,.16)}.water .mark .ms{fill:rgba(245,240,230,.1)}
+.water{display:flex;align-items:baseline;justify-content:center;gap:0;margin:0;padding-bottom:2vw;color:rgba(245,240,230,.07);font-weight:800;letter-spacing:-.06em;line-height:.78;font-size:clamp(72px,21vw,280px);user-select:none;pointer-events:none}
+.water .mark{width:.3em;height:.32em;flex:none;margin-left:.02em}.water .mark .mc{color:#9DB2E0}.water .mark .ms{fill:rgba(245,240,230,.1)}
+/* when the circle lands in the logo, its star lights: one spring a little past its size, then still */
+.water .lit{transform-box:fill-box;transform-origin:50% 50%;transform:scale(.85);transition:transform .6s cubic-bezier(.34,1.56,.64,1)}
+.water .lit .ms{transition:fill .4s var(--ease)}
+.water .mark.on .lit{transform:rotate(90deg) scale(1)}.water .mark.on .ms{fill:var(--paper)}
 .foot :focus-visible{outline-color:#9DB2E0}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}

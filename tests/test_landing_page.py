@@ -126,18 +126,17 @@ class LandingPageTest(unittest.TestCase):
         css = (ROOT / "assets" / "home.css").read_text(encoding="utf-8")
         js = (ROOT / "assets" / "home.js").read_text(encoding="utf-8")
         self.assertIn("prefers-reduced-motion", css)
-        # the trailer, the arrival beats and the glides all check reduce motion
+        # the entrance, the arrival beats and the glides all check reduce motion
         self.assertIn("prefers-reduced-motion: reduce", js)
         self.assertIn('<script src="assets/home.js" defer></script>', HTML)
         # the story's words are in the page, not only written by the script
         self.assertIn('<h2 id="h1">Rent goes up.</h2>', HTML)
 
-    def test_the_trailer_moves_for_under_five_seconds(self):
+    def test_the_entrance_moves_for_under_five_seconds(self):
         # WCAG 2.2.2: motion that starts by itself and lasts over five seconds needs a pause control
         js = (ROOT / "assets" / "home.js").read_text(encoding="utf-8")
-        run = re.search(r"const run=(\[\[.*?\]\]),t0", js).group(1)
-        last = max(int(t) for t in re.findall(r"\[(\d+),", run))
-        self.assertLess(last, 5000)
+        wait, move = map(int, re.search(r"const ENTER=\{wait:(\d+),move:(\d+)\}", js).groups())
+        self.assertLess(wait + move, 5000)
         # and any scroll, key, tap or click stops it at once
         self.assertIn("['wheel','touchstart','keydown','pointerdown']", js)
 
