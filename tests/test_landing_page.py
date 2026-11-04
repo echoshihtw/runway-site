@@ -65,7 +65,6 @@ class LandingPageTest(unittest.TestCase):
             "A friend's wedding abroad.",
             "Financial Runway keeps that number true.",
             "Try one.",
-            "Two more things it does.",
             "What people ask.",
             "Know the time you have.",
         ])

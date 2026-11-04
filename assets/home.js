@@ -330,7 +330,7 @@ function stops(){
   list.push(b.offsetTop+(b.offsetHeight-vh)*.3,b.offsetTop+(b.offsetHeight-vh)*.85);
   const c=PLAN[life][1].length;
   if(run.classList.contains('auto'))for(let k=0;k<c;k++)list.push(run.offsetTop+(k+.5)/c*(run.offsetHeight-vh));else list.push(run.offsetTop);
-  list.push(document.querySelector('.after').offsetTop,document.querySelector('.foot').offsetTop);return list;
+  list.push(document.querySelector('.asks').offsetTop,document.querySelector('.foot').offsetTop);return list;
 }
 function step(group,dir){
   const all=[...group.querySelectorAll('button')],cur=all.findIndex(x=>x.classList.contains('on'));
