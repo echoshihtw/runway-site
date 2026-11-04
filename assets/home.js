@@ -351,33 +351,42 @@ addEventListener('keydown',e=>{
   }
 });
 // One circle through the page: scroll carries the story's runway circle into the full stop of "Wait.",
-// on to the end of "What if", then into the planner's circle. It travels on an arc, gathers before it
+// on to the end of "What if", into the planner's circle, through the full stops of the last two headings
+// and into the logo. It travels on an arc, gathers before it
 // leaves and squashes as it lands; the number never travels, it fades out before and in after.
 const clamp01=v=>Math.min(1,Math.max(0,v)),hump=(u,a,b)=>Math.sin(Math.PI*clamp01((u-a)/(b-a)));
 function spot(el,k=1){const r=el.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2,d:r.width*k}}
 function carry(){
-  const b=document.querySelector('.beat'),r=b.getBoundingClientRect(),run=b.offsetHeight-innerHeight,raw=-r.top/run,end=b.offsetHeight/run-.02;
-  const fade=1-clamp01((raw+.72)/.1);$('cnum').style.opacity=$('cline').style.opacity=fade;
-  $('shape').style.visibility=raw>=-.62?'hidden':'';
-  document.querySelector('.pcircle').classList.toggle('away',raw<end);
-  const c=$('carrier'),story=()=>{const o=spot($('shape'),.9);o.y-=$('stage').getBoundingClientRect().top;return o},p1=()=>spot($('pt1')),p2=()=>spot($('pt2')),plan=()=>spot(document.querySelector('.pcircle'));
-  // [from, to, start, stop, how it lands]
-  const legs=[[story,p1,-.62,.25,'drop'],[p1,p2,.55,.85,'drop'],[p2,plan,.95,end,'grow']];
-  const leg=raw<-.62||raw>=end?null:legs.find(l=>raw<l[3])||legs[2],at=leg?(raw<leg[2]?0:clamp01((raw-leg[2])/(leg[3]-leg[2]))):0;
-  if(!leg){c.style.opacity=0;return}
-  c.style.background=$('pnum').style.background; // the runway state's colour, the same as the circle it becomes
+  const vh=innerHeight,b=document.querySelector('.beat'),run=b.offsetHeight-vh,raw=-b.getBoundingClientRect().top/run,end=b.offsetHeight/run-.02;
+  const pc=document.querySelector('.pcircle'),mark=document.querySelector('.water .mc');
+  const story=()=>{const o=spot($('shape'),.9);o.y-=$('stage').getBoundingClientRect().top;return o},at=id=>()=>spot($(id)),plan=()=>spot(pc),logo=()=>spot(mark);
+  const byRaw=(a,z)=>clamp01((raw-a)/(z-a)),rise=(id,a=.85,z=.4)=>clamp01((a*vh-spot($(id)).y)/((a-z)*vh));
+  // the logo lands over the last stretch of the page, once the footer's full stop has its circle
+  const last=()=>{const from=scrollY+spot($('pt4')).y-.6*vh,room=document.documentElement.scrollHeight-vh-from;return clamp01((scrollY-from)/Math.max(40,room))};
+  // from, to, progress, how it lands; the story's moves are driven by the beat, the later ones by their place rising into view
+  const legs=[[story,at('pt1'),byRaw(-.62,.25),'drop'],[at('pt1'),at('pt2'),byRaw(.55,.85),'drop'],[at('pt2'),plan,byRaw(.95,end),'grow'],
+    [plan,at('pt3'),rise('pt3'),'drop'],[at('pt3'),at('pt4'),rise('pt4',.95,.6),'drop'],[at('pt4'),logo,last(),'drop']];
+  let k=-1;legs.forEach((l,n)=>{if(l[2]>0)k=n});
+  const u=k<0?0:legs[k][2],c=$('carrier');
+  $('cnum').style.opacity=$('cline').style.opacity=1-clamp01((raw+.72)/.1); // the number fades before the circle leaves
+  $('shape').style.visibility=k>=0?'hidden':'';
+  // the planner's circle is the circle itself while it rests there; its number fades out before it leaves
+  const inPlan=(k===2&&u>=1)||(k===3&&u<.15);
+  pc.classList.toggle('away',!inPlan);$('pnum').style.color=k===3?`rgb(245 240 230 / ${1-u/.15})`:'';
+  mark.style.visibility=k===5&&u>=1?'':'hidden';
+  if(k<0||inPlan||(k===5&&u>=1)){c.style.opacity=0;return}
+  let A=legs[k][0](),B=legs[k][1](),go=k===3?clamp01((u-.15)/.85):u,fade=1;
+  const state=$('pnum').style.background,light='#9DB2E0',t=ease(go);
+  c.style.background=k<4?state:k===4?`color-mix(in oklab, ${state} ${(1-t)*100}%, ${light})`:`color-mix(in oklab, ${light} ${(1-t)*100}%, rgb(157 178 224 / .16))`;
   // on a phone the planner's circle is still below the screen while the dot leaves, so that move is a fade
-  if(leg===legs[2]&&innerWidth<800){const A=p2();c.style.opacity=1-clamp01(at*3);c.style.transform=`translate(${A.x-50}px,${A.y+A.d/2-100}px) scale(${A.d/100})`;return}
-  const [from,to,,,land]=leg,A=from(),B=to(),t=ease(at),lift=Math.hypot(B.x-A.x,B.y-A.y)*(land==='drop'?.25:.12);
+  if(k===2&&innerWidth<800){c.style.opacity=1-clamp01(go*3);c.style.transform=`translate(${A.x-50}px,${A.y+A.d/2-100}px) scale(${A.d/100})`;return}
+  // two places too far apart to share the screen: the circle drops into the next one instead of crossing what people read
+  if(k>=3&&Math.abs(B.y-A.y)>.5*vh){A={x:B.x,y:B.y-Math.max(24,B.d*3),d:B.d};fade=clamp01(go/.4)}
+  const land=legs[k][3],lift=Math.hypot(B.x-A.x,B.y-A.y)*(land==='drop'?.25:.12);
   const C={x:(A.x+B.x)/2,y:Math.min(A.y,B.y)-lift},q=(a,m,z)=>(1-t)*(1-t)*a+2*(1-t)*t*m+t*t*z;
-  const x=q(A.x,C.x,B.x),y=q(A.y,C.y,B.y),gather=1+.06*hump(at,0,.25),out=land==='grow'?1+.08*hump(at,.75,1):1,sq=land==='drop'?.16*hump(at,.82,1):0;
+  const x=q(A.x,C.x,B.x),y=q(A.y,C.y,B.y),gather=k<3?1+.06*hump(go,0,.25):1,out=land==='grow'?1+.08*hump(go,.75,1):1,sq=.16*(land==='drop')*hump(go,.82,1);
   const d=lerp(A.d,B.d,t)*gather*out;
-  c.style.opacity=1;c.style.transform=`translate(${x-50}px,${y+d/2-100}px) scale(${d/100*(1+sq)},${d/100*(1-sq)})`;
+  c.style.opacity=fade;c.style.transform=`translate(${x-50}px,${y+d/2-100}px) scale(${d/100*(1+sq)},${d/100*(1-sq)})`;
 }
-// The footer's mark: the same circle drops into its place beside the name, and lands the same way.
-function water(){
-  const w=document.querySelector('.water'),m=w.querySelector('.mc'),r=w.getBoundingClientRect(),u=clamp01((innerHeight-r.top)/(r.height*.9));
-  const sq=.16*hump(u,.82,1);m.style.transform=`translateY(${-(1-ease(u))*16}px) scale(${1+sq},${1-sq})`;
-}
-if(!calm){document.body.classList.add('carry');addEventListener('scroll',()=>requestAnimationFrame(()=>{carry();water()}),{passive:true});addEventListener('resize',carry)}
-words();measure();planGoals();beat();if(!calm){carry();water()}setTimeout(trailer,500);
+if(!calm){document.body.classList.add('carry');addEventListener('scroll',()=>requestAnimationFrame(carry),{passive:true});addEventListener('resize',carry)}
+words();measure();planGoals();beat();if(!calm)carry();setTimeout(trailer,500);
