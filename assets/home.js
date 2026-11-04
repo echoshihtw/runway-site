@@ -155,7 +155,7 @@ function words(){
     $('d'+(k+1)).textContent=(e[1]>0?'+':'−')+Math.abs(e[1])+(Math.abs(e[1])===1?' month':' months');
     $('s'+(k+1)).textContent='. Runway now '+f.n+' '+f.unit+', until '+f.until+'.'});
 }
-// The entrance: once, at the top, a circle grows out of the logo's circle and travels to the story's place,
+// The entrance: once, at the top, the logo's circle leaves it and travels to the story's place,
 // turning into this life's starting shape as it lands; then the question fades in. Under five seconds of
 // motion, so it needs no pause control (WCAG 2.2.2); any scroll, key or tap ends it, and reduce motion skips it.
 const ENTER={wait:300,move:900};
@@ -165,12 +165,13 @@ function entrance(){
   const logo=spot(document.querySelector('.brand .mc')),box=el.getBoundingClientRect(),home=s.getBoundingClientRect();
   const B={x:box.left+box.width/2,y:box.top+box.height/2},C=bow(logo,B),round=radii('circle'),own=key(0).r,k0=logo.d/(.9*box.width);
   s.style.transformOrigin=`${B.x-home.left}px ${B.y-home.top}px`;s.style.willChange='transform';
-  let done=0;story.classList.add('entering');
-  const stop=()=>{if(done)return;done=1;s.style.transform=s.style.transformOrigin=s.style.willChange='';story.classList.remove('entering');frame();
+  const mark=document.querySelector('.brand .mark');let done=0;story.classList.add('entering');
+  const stop=()=>{if(done)return;done=1;s.style.transform=s.style.transformOrigin=s.style.willChange='';story.classList.remove('entering');mark.classList.remove('gone');frame();
     ['wheel','touchstart','keydown','pointerdown'].forEach(e=>removeEventListener(e,stop))};
   ['wheel','touchstart','keydown','pointerdown'].forEach(e=>addEventListener(e,stop,{passive:true}));
   const tick=now=>{if(done)return;const go=clamp01((now-t0-ENTER.wait)/ENTER.move),t=glide(go),f=follow(go);
     const x=q2(logo.x,C.x,B.x,t)-B.x,y=q2(logo.y,C.y,B.y,t)-B.y,size=lerp(k0,1,f)*(1+.06*hump(go,0,.25)),sq=.16*hump(go,.82,1);
+    mark.classList.toggle('gone',go>0); // the logo's own circle is the one travelling, so it is gone until it lands
     el.style.clipPath=poly(mix(round,own,f),0); // round like the logo, its own shape by the time it lands
     s.style.transform=`translate(${x}px,${y+box.height*size*sq/2}px) scale(${size*(1+sq)},${size*(1-sq)})`;
     if(go>=1){stop();return}requestAnimationFrame(tick)};

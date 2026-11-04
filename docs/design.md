@@ -14,7 +14,7 @@ The rules the home page is built on. Change a rule here first, then the page.
 
 One circle carries the page, from the nav logo to the footer logo:
 
-1. On load it grows out of the nav logo's circle and lands as the life's starting shape.
+1. On load the nav logo's circle leaves the logo and lands as the life's starting shape; the logo's circle then grows back.
 2. The story changes its shape, then it becomes the runway circle.
 3. It becomes the full stop of "Wait.", then the last dot of "What if".
 4. It becomes the planner's circle.
